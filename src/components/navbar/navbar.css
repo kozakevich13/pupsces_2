@@ -1,0 +1,52 @@
+.avatar-circle {
+  border-radius: 100%;
+  background-color: #740202;
+  color: #e5f4e2;
+
+  padding: 12px 13px;
+  cursor: pointer;
+}
+
+.avatar {
+  border-radius: 100% !important;
+  background-color: #740202;
+  color: #e5f4e2;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.navbar {
+  transition: opacity 0.3s ease;
+  top: 0; /* Position at the top of the viewport */
+  width: 100%; /* Occupy full width */
+  z-index: 999;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: white;
+  padding-bottom: 3px; /* Add spacing between text and line */
+}
+
+.nav-link.active {
+  border-bottom: 2px solid #e9b824; /* Line style for active link */
+}
+
+.nav-link.drawer.active {
+  width: fit-content;
+  top: 0; /* Position at the top of the viewport */
+  width: 100%; /* Occupy full width */
+  z-index: 999;
+  
+}
+
+.nav-link:hover {
+  color: yellow;
+}
+
