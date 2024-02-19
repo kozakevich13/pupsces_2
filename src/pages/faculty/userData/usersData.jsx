@@ -15,8 +15,11 @@ import {
   VStack,
   Wrap,
   useToast,
+  Icon,
   Checkbox,
+  IconButton,
 } from "@chakra-ui/react";
+import { FaPlus } from "react-icons/fa";
 import axios from "axios";
 import PropTypes from "prop-types";
 import React, { useEffect, useState, useCallback } from "react";
@@ -1688,16 +1691,30 @@ function UsersData({ studentNumber, facultyId, program, strand }) {
                               <Tr key={uuidv4()}>
                                 <Td>
                                   {window.innerWidth <= 600 && (
-                                    <Checkbox
-                                      mr="1rem"
-                                      isChecked={selectedItemIds.includes(
-                                        courseItem.course_code
-                                      )}
-                                      onChange={() =>
+                                    <IconButton
+                                      size="sm"
+                                      icon={
+                                        <Icon
+                                          as={FaPlus}
+                                          boxSize={4}
+                                          fontSize={14}
+                                        />
+                                      }
+                                      onClick={() =>
                                         handleCheckboxChange(
                                           courseItem.course_code
                                         )
                                       }
+                                      aria-label="Add"
+                                      colorScheme={
+                                        selectedItemIds.includes(
+                                          courseItem.course_code
+                                        )
+                                          ? "blue"
+                                          : "red"
+                                      }
+                                      borderRadius="full"
+                                      mr="1rem"
                                     />
                                   )}
                                   {courseItem.course_code}
