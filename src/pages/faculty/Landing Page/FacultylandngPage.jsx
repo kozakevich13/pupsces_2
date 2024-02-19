@@ -109,10 +109,10 @@ function LandingPage() {
             top="0"
             left="49%"
             transform="translate(-50%, -50%) rotate(-15deg)"
-            width="100vw" // Змінив ширину батьківського блоку
+            width="100vw"
             height="90vh"
             bgColor="rgba(116, 2, 2, 1)"
-            overflow="hidden" // Додав overflow: hidden
+            overflow="hidden"
             zIndex={1}
             borderRadius="20px"
           >
@@ -120,7 +120,7 @@ function LandingPage() {
               className="image"
               position="absolute"
               width="calc(100% + 35px)"
-              height="100%" // Змінив висоту на 100%, щоб зайняти всю висоту батьківського блоку
+              height="100%"
               bgImage={`url(${Faculty_bg})`}
               bgRepeat="no-repeat"
               bgPos="center"
@@ -131,8 +131,6 @@ function LandingPage() {
               zIndex={-1}
               opacity="0.2"
               transform="rotate(15deg)"
-              // overflow="hidden"
-              // overflowX="hidden" // Змінено overflowX на hidden
             ></Box>
           </Box>
           <Box opacity="0.9" position="absolute" zIndex={9999}>
@@ -144,11 +142,11 @@ function LandingPage() {
               left="124px"
               h="2rem"
               color="white"
-              w={{ base: "10rem", sm: "30rem", md: "40rem", lg: "50rem" }} // Брейкпоінти для ширини
+              w={{ base: "10rem", sm: "30rem", md: "40rem", lg: "50rem" }}
               sx={{
                 fontSize: { base: "md", sm: "md", md: "lg", lg: "xl" },
                 fontWeight: "bold",
-              }} // Брейкпоінти для fontsize та fontWeight
+              }}
             >
               PUP Student Curriculum Evaluation System
             </Heading>
@@ -162,27 +160,24 @@ function LandingPage() {
                 size="lg"
                 h="2rem"
                 color="white"
-                w={{ base: "10rem", sm: "10rem", md: "15rem", lg: "20rem" }} // Брейкпоінти для ширини
+                w={{ base: "10rem", sm: "10rem", md: "15rem", lg: "20rem" }}
                 sx={{
                   fontSize: { base: "md", sm: "lg", md: "xl", lg: "35px" },
                   fontWeight: "bold",
-                }} // Брейкпоінти для fontsize та fontWeight
+                }}
               >
                 Good Day!
               </Heading>
               <Heading
                 as="h2"
                 size="lg"
-                // position="absolute"
-                // top="350"
-                // left="120px"
                 h="2rem"
                 color="white"
-                w={{ base: "10rem", sm: "10rem", md: "15rem", lg: "20rem" }} // Брейкпоінти для ширини
+                w={{ base: "10rem", sm: "10rem", md: "15rem", lg: "20rem" }}
                 sx={{
                   fontSize: { base: "md", sm: "lg", md: "xl", lg: "35px" },
                   fontWeight: "bold",
-                }} // Брейкпоінти для fontsize та fontWeight
+                }}
               >
                 {facultyName}
               </Heading>
@@ -199,11 +194,11 @@ function LandingPage() {
               size="lg"
               h={{ base: "3rem", sm: "3rem", md: "4rem", lg: "5rem" }}
               color="black"
-              w={{ base: "20rem", sm: "20rem", md: "20rem", lg: "30rem" }} // Брейкпоінти для ширини
+              w={{ base: "20rem", sm: "20rem", md: "20rem", lg: "30rem" }}
               sx={{
                 fontSize: { base: "15px", sm: "15px", md: "20px", lg: "30px" },
                 fontWeight: "bold",
-              }} // Брейкпоінти для fontsize та fontWeight
+              }}
               textAlign={{
                 base: "center",
                 sm: "rights",
@@ -221,7 +216,7 @@ function LandingPage() {
               <VStack>
                 <Heading
                   as="h4"
-                  w={{ base: "6rem", sm: "6rem", md: "8rem", lg: "10rem" }} // Брейкпоінти для ширини
+                  w={{ base: "6rem", sm: "6rem", md: "8rem", lg: "10rem" }}
                   sx={{
                     fontSize: {
                       base: "14px",
@@ -235,8 +230,8 @@ function LandingPage() {
                   Total Students
                 </Heading>
                 <Spacer
-                  borderBottom="2px solid black" // Бордер внизу хедера
-                  width="50%" // Довжина бордера - 80% від довжини хедера
+                  borderBottom="2px solid black"
+                  width="50%"
                   spacing={4}
                   marginLeft="auto"
                   borderColor="#F9AB00"
@@ -248,7 +243,7 @@ function LandingPage() {
               <VStack>
                 <Heading
                   as="h4"
-                  w={{ base: "5rem", sm: "5rem", md: "8rem", lg: "10rem" }} // Брейкпоінти для ширини
+                  w={{ base: "5rem", sm: "5rem", md: "8rem", lg: "10rem" }}
                   sx={{
                     fontSize: {
                       base: "14px",
@@ -262,8 +257,8 @@ function LandingPage() {
                   Female
                 </Heading>
                 <Spacer
-                  borderBottom="2px solid black" // Бордер внизу хедера
-                  width="30%" // Довжина бордера - 80% від довжини хедера
+                  borderBottom="2px solid black"
+                  width="30%"
                   spacing={4}
                   marginLeft="auto"
                   borderColor="#F9AB00"
@@ -275,7 +270,7 @@ function LandingPage() {
               <VStack>
                 <Heading
                   as="h4"
-                  w={{ base: "5rem", sm: "5rem", md: "8rem", lg: "10rem" }} // Брейкпоінти для ширини
+                  w={{ base: "5rem", sm: "5rem", md: "8rem", lg: "10rem" }}
                   sx={{
                     fontSize: {
                       base: "14px",
@@ -289,8 +284,8 @@ function LandingPage() {
                   Mele
                 </Heading>
                 <Spacer
-                  borderBottom="2px solid black" // Бордер внизу хедера
-                  width="20%" // Довжина бордера - 80% від довжини хедера
+                  borderBottom="2px solid black"
+                  width="20%"
                   spacing={4}
                   marginLeft="auto"
                   borderColor="#F9AB00"
@@ -365,13 +360,13 @@ function LandingPage() {
               <Image
                 src={Analytics}
                 alt="Опис зображення"
-                w="70px" // Ширина
-                h="auto" // Автоматична висота, щоб зберігти пропорції
-                borderRadius="md" // Радіус кутів
+                w="70px"
+                h="auto"
+                borderRadius="md"
               />
               <Heading
                 as="h4"
-                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }} // Брейкпоінти для ширини
+                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }}
                 sx={{
                   fontSize: { base: "md", sm: "lg", md: "xl", lg: "20px" },
                   fontWeight: "bold",
@@ -395,13 +390,13 @@ function LandingPage() {
               <Image
                 src={Curriculum}
                 alt="Опис зображення"
-                w="70px" // Ширина
-                h="auto" // Автоматична висота, щоб зберігти пропорції
-                borderRadius="md" // Радіус кутів
+                w="70px"
+                h="auto"
+                borderRadius="md"
               />
               <Heading
                 as="h4"
-                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }} // Брейкпоінти для ширини
+                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }}
                 sx={{
                   fontSize: { base: "md", sm: "lg", md: "xl", lg: "20px" },
                   fontWeight: "bold",
@@ -423,13 +418,13 @@ function LandingPage() {
               <Image
                 src={Evaluation}
                 alt="Опис зображення"
-                w="70px" // Ширина
-                h="auto" // Автоматична висота, щоб зберігти пропорції
-                borderRadius="md" // Радіус кутів
+                w="70px"
+                h="auto"
+                borderRadius="md"
               />
               <Heading
                 as="h4"
-                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }} // Брейкпоінти для ширини
+                w={{ base: "10rem", sm: "10rem", md: "20rem", lg: "10rem" }}
                 sx={{
                   fontSize: { base: "md", sm: "lg", md: "xl", lg: "20px" },
                   fontWeight: "bold",
