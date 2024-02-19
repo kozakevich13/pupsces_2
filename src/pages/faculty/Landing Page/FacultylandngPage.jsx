@@ -83,21 +83,31 @@ function LandingPage() {
   }, [facultyprogram]);
 
   return (
-    <Flex w="100vw">
+    <Flex
+      direction="column"
+      position="absolute"
+      minHeight="100vh"
+      justifyContent="space-between"
+      alignItems="center"
+      width="100%"
+      // paddingY="2rem"
+    >
+      <FacultyNavbar />
+
       <Box
         w="100%"
-        pos="sticky"
+        position="sticky"
         h="6rem"
         boxShadow="lg"
         top="0"
         right="0"
-        bgColor="#F3F8FF"
+        // bgColor="#F3F8FF"
         zIndex="1"
         // overflow="hidden"
       >
-        <FacultyNavbar />
         <Box
-          position="relative"
+          position="absolute"
+          bottom="55px"
           w="100vw"
           h="80vh"
           overflow="hidden"
@@ -342,7 +352,7 @@ function LandingPage() {
           position="absolute"
           w="100vw"
           h="70vh"
-          top={{ base: "700px", sm: "700px", md: "800px", lg: "800px" }}
+          top={{ base: "107px", sm: "107px", md: "207px", lg: "207px" }}
         >
           <Box
             display="flex"
