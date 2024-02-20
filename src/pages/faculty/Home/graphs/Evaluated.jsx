@@ -6,6 +6,7 @@ import {
   Divider,
   Flex,
   HStack,
+  VStack,
   Select,
   Table,
   TableContainer,
@@ -14,12 +15,16 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
 import axios from "axios";
 import html2pdf from "html2pdf.js";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { endPoint } from "../../../config";
+import { FaPlus } from "react-icons/fa";
 
 function Evaluated() {
   const [selectedSemester, setSelectedSemester] = useState("");
@@ -29,6 +34,8 @@ function Evaluated() {
   const [facultyId, setFacultyId] = useState();
   const [facultyprogram, setFacultyProgram] = useState([]);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 600);
+  const [showColumn, setShowColumn] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
 
   useEffect(() => {
     if (facultyEmail) {
@@ -48,17 +55,17 @@ function Evaluated() {
     }
   }, [facultyEmail]);
 
-   useEffect(() => {
-     const handleResize = () => {
-       setIsSmallScreen(window.innerWidth < 600);
-     };
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 600);
+    };
 
-     window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
 
-     return () => {
-       window.removeEventListener("resize", handleResize);
-     };
-   }, []);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   //fetch evaluate
   useEffect(() => {
@@ -156,17 +163,31 @@ function Evaluated() {
     return formattedDate;
   };
 
+  const handleCheckboxChange = (id) => {
+    setSelectedItemIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        return prevSelectedIds.filter((itemId) => itemId !== id);
+      } else {
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowColumn(window.innerWidth > 600);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <Card
-    
-      mt="2rem"
-      w="100%"
-      h="auto"
-      boxShadow="2xl"
-      borderRadius="30px"
-    >
+    <Card mt="2rem" w="100%" h="auto" boxShadow="2xl" borderRadius="30px">
       <div ref={containerRef}>
-        <Flex justify="space-between" align="center" >
+        <Flex justify="space-between" align="center">
           <CardHeader>List of Evaluated Students</CardHeader>
           <HStack
             spacing={{ base: "1rem", sm: "2rem" }}
@@ -245,28 +266,32 @@ function Evaluated() {
                     Name
                   </Th>
 
-                  <Th
-                    style={{ textAlign: "center" }}
-                    fontSize="10px"
-                    color="palette.secondary"
-                  >
-                    Semester
-                  </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    fontSize="10px"
-                    color="palette.secondary"
-                  >
-                    <div>Academic</div>
-                    <div>Year</div>
-                  </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    fontSize="10px"
-                    color="palette.secondary"
-                  >
-                    <div>Date</div>
-                  </Th>
+                  {showColumn && (
+                    <>
+                      <Th
+                        style={{ textAlign: "center" }}
+                        fontSize="10px"
+                        color="palette.secondary"
+                      >
+                        Semester
+                      </Th>
+                      <Th
+                        style={{ textAlign: "center" }}
+                        fontSize="10px"
+                        color="palette.secondary"
+                      >
+                        <div>Academic</div>
+                        <div>Year</div>
+                      </Th>
+                      <Th
+                        style={{ textAlign: "center" }}
+                        fontSize="10px"
+                        color="palette.secondary"
+                      >
+                        <div>Date</div>
+                      </Th>
+                    </>
+                  )}
                 </Tr>
               </Thead>
 
@@ -274,23 +299,100 @@ function Evaluated() {
                 {(selectedSemester && filteredEvaluated.length > 0) ||
                 (selectedYearLevel && filteredEvaluated.length > 0) ? (
                   filteredEvaluated.map((evaluation) => (
-                    <Tr key={evaluation.evaluate_id}>
-                      <Td style={{ textAlign: "center" }} fontSize="12px">
-                        <div>{evaluation.student_number}</div>
-                      </Td>
-                      <Td style={{ textAlign: "center" }} fontSize="12px">
-                        <div>{`${evaluation.first_name} ${evaluation.middle_name} ${evaluation.last_name}`}</div>
-                      </Td>
-                      <Td style={{ textAlign: "center" }} fontSize="12px">
-                        {evaluation.eval_sem}
-                      </Td>
-                      <Td style={{ textAlign: "center" }} fontSize="12px">
-                        {evaluation.eval_year}
-                      </Td>
-                      <Td style={{ textAlign: "center" }} fontSize="12px">
-                        {formatDate(evaluation.date_eval)}
-                      </Td>
-                    </Tr>
+                    <>
+                      <Tr key={evaluation.evaluate_id}>
+                        <Td style={{ textAlign: "center" }} fontSize="12px">
+                          <div>
+                            {window.innerWidth <= 600 && (
+                              <IconButton
+                                size="sm"
+                                icon={
+                                  <Icon as={FaPlus} boxSize={4} fontSize={14} />
+                                }
+                                onClick={() =>
+                                  handleCheckboxChange(evaluation.evaluate_id)
+                                }
+                                aria-label="Add"
+                                colorScheme={
+                                  selectedItemIds.includes(
+                                    evaluation.evaluate_id
+                                  )
+                                    ? "blue"
+                                    : "red"
+                                }
+                                borderRadius="full"
+                                mr="1rem"
+                              />
+                            )}
+                            {evaluation.student_number}
+                          </div>
+                        </Td>
+                        <Td style={{ textAlign: "center" }} fontSize="12px">
+                          <div>{`${evaluation.first_name} ${evaluation.middle_name} ${evaluation.last_name}`}</div>
+                        </Td>
+
+                        {showColumn && (
+                          <>
+                            {" "}
+                            <Td style={{ textAlign: "center" }} fontSize="12px">
+                              {evaluation.eval_sem}
+                            </Td>
+                            <Td style={{ textAlign: "center" }} fontSize="12px">
+                              {evaluation.eval_year}
+                            </Td>
+                            <Td style={{ textAlign: "center" }} fontSize="12px">
+                              {formatDate(evaluation.date_eval)}
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                      {window.innerWidth <= 600 && (
+                        <Td
+                          display={
+                            selectedItemIds.includes(evaluation.evaluate_id)
+                              ? "table-row"
+                              : "none"
+                          }
+                          w="80%"
+                        >
+                          {" "}
+                          <Flex justify="flex-end" ml="1rem">
+                            <VStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="6rem"
+                                  fontWeight="bold"
+                                >
+                                  Semester:
+                                </Text>{" "}
+                                <Text> {evaluation.eval_sem}</Text>
+                              </HStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="8rem"
+                                  fontWeight="bold"
+                                >
+                                  Academic year:
+                                </Text>{" "}
+                                <Text>{evaluation.eval_year}</Text>
+                              </HStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="6rem"
+                                  fontWeight="bold"
+                                >
+                                  Date:
+                                </Text>{" "}
+                                <Text>{evaluation.date_eval}</Text>
+                              </HStack>
+                            </VStack>
+                          </Flex>
+                        </Td>
+                      )}
+                    </>
                   ))
                 ) : (
                   <Tr>
