@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Flex,
   HStack,
@@ -21,6 +20,9 @@ import {
   VStack,
   Wrap,
   useToast,
+  Box,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
 import axios from "axios";
 import html2pdf from "html2pdf.js";
@@ -34,6 +36,7 @@ import breakPoints from "../../../utils/breakpoint";
 import { endPoint } from "../../config";
 import SpecialGradeModal from "./SpecialGradeModal";
 import "./curriculum.css";
+import { FaPlus } from "react-icons/fa";
 
 function Curriculum() {
   const studentNumber = Cookies.get("student_number");
@@ -73,6 +76,8 @@ function Curriculum() {
   const [loading, setLoading] = useState(true);
   const [specialGradeSubmitted, setSpecialGradeSubmitted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showColumn, setShowColumn] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
 
   const [modalData, setModalData] = useState({
     courseCode: "",
@@ -199,7 +204,11 @@ function Curriculum() {
     //  console.log("Fetching course data...");
 
     let courseType = "";
-    if (studentNumber.startsWith("2020")||studentNumber.startsWith("2021") || studentNumber.startsWith("2019")) {
+    if (
+      studentNumber.startsWith("2020") ||
+      studentNumber.startsWith("2021") ||
+      studentNumber.startsWith("2019")
+    ) {
       courseType = 2019;
     } else {
       courseType = 2022;
@@ -231,7 +240,7 @@ function Curriculum() {
           .map((course) => course.pre_requisite.trim());
 
         setPrerequisiteCourses(prerequisiteCourseCodes);
-       
+
         const coursesWithGrades = courseData.filter(
           (courseItem) => selectedGrades[courseItem.course_code] !== undefined
         );
@@ -549,9 +558,9 @@ function Curriculum() {
   console.log("filteredCourses", filteredCourses);
   if (
     studentNumber.startsWith("2020") ||
-    studentNumber.startsWith("2021") &&
-    programId === 1 &&
-    !(strand === "STEM" || strand === "ICT")
+    (studentNumber.startsWith("2021") &&
+      programId === 1 &&
+      !(strand === "STEM" || strand === "ICT"))
   ) {
     console.log("Adding Bridging Semester...");
     console.log("All Courses:", course);
@@ -1216,8 +1225,26 @@ function Curriculum() {
     }
   };
 
-  // const studentData1 = localStorage.getItem("studentData");
- 
+  const handleCheckboxChange = (id) => {
+    setSelectedItemIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        return prevSelectedIds.filter((itemId) => itemId !== id);
+      } else {
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowColumn(window.innerWidth > 600);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <Flex
@@ -1225,7 +1252,7 @@ function Curriculum() {
       minHeight="100vh"
       justifyContent="space-between"
       alignItems="center"
-      //w="100%"
+      w="100vw"
       //bgColor="#F8F8F8"
     >
       <Box
@@ -1241,8 +1268,8 @@ function Curriculum() {
         <Navbar />
       </Box>
 
-      <VStack mt="0" mb="0" flexGrow={1} w="100%">
-        <InputGroup mt="8rem" ml="0" w="20rem">
+      <VStack mt="0" mb="0" flexGrow={1} w="100%" minH="80vh">
+        <InputGroup mt="8rem" ml="auto" mr="auto" w="20rem">
           <Input
             p="1rem"
             fontFamily="inter"
@@ -1334,7 +1361,7 @@ function Curriculum() {
                 Download
               </Button>
             </Flex>
-            {console.log("Courses:", allCourses)}
+
             {allCourses.length === 0 ? (
               <Text>No courses available</Text>
             ) : (
@@ -1371,32 +1398,75 @@ function Curriculum() {
                     key={key}
                     ref={index === foundCourseIndex ? scrollRef : null}
                   >
-                    <VStack spacing="1" align="flex-start">
+                    <VStack
+                      spacing="1"
+                      align="flex-start"
+                      flexDirection={{
+                        base: "column",
+                        md: "row",
+                        lg: "row",
+                      }}
+                      w="90vw"
+                    >
                       <HStack>
-                        <Text fontSize="17.5px" fontWeight="semibold">
+                        <Text
+                          fontSize={{ base: "15px", md: "17.5px" }}
+                          fontWeight="semibold"
+                        >
                           {" "}
                           Year Level:{" "}
                         </Text>
-                        <Text w="10rem" fontWeight="md" fontSize="17.5px">
+                        <Text
+                          w={{ base: "100%", md: "10rem" }}
+                          fontWeight="md"
+                          fontSize={{ base: "15px", md: "17.5px" }}
+                        >
                           {`${courseYear} Year `}
                         </Text>
                       </HStack>
 
-                      <HStack spacing="28rem" justifyContent="space-between">
+                      <HStack
+                        ml={{
+                          base: "0",
+                          md: "auto",
+                          lg: "auto",
+                        }}
+                        justifyContent="space-between"
+                        w={{
+                          base: "90vw",
+                          md: "45vw",
+                          lg: "45vw",
+                        }}
+                      >
                         <HStack>
-                          <Text fontSize="17.5px" fontWeight="semibold">
+                          <Text
+                            fontSize={{ base: "15px", md: "17.5px" }}
+                            fontWeight="semibold"
+                          >
                             {" "}
                             Semester:{" "}
                           </Text>
-                          <Text w="20rem" fontWeight="md" fontSize="17.5px">
+                          <Text
+                            fontWeight="md"
+                            fontSize={{ base: "15px", md: "17.5px" }}
+                          >
                             {`${capitalizeWords(courseSemester)} Semester `}
                           </Text>
                         </HStack>
-                        <HStack>
-                          <Text fontSize="17.5px" fontWeight="semibold">
+                        <HStack w="40%">
+                          <Text
+                            fontSize={{ base: "15px", md: "17.5px" }}
+                            fontWeight="semibold"
+                            w="50%"
+                          >
                             School Year:{" "}
                           </Text>
-                          <Text>{schoolYear}</Text>
+                          <Text
+                            w="50%"
+                            fontSize={{ base: "15px", md: "17.5px" }}
+                          >
+                            {schoolYear}
+                          </Text>
                         </HStack>
                       </HStack>
                     </VStack>
@@ -1405,12 +1475,12 @@ function Curriculum() {
                       <Table
                         variant="simple"
                         fontFamily="inter"
-                        size="sm"
+                        // size="sm"
                         w="100%"
                         overflowX="auto"
                         style={{ minWidth: "200px" }}
                       >
-                        <Thead bg="palette.primary" h="5rem">
+                        <Thead bg="palette.primary" h="5rem" w="100%">
                           <Tr>
                             <Th
                               style={{ textAlign: "center" }}
@@ -1419,68 +1489,76 @@ function Curriculum() {
                               Course Code
                             </Th>
                             <Th color="palette.secondary">Course Title</Th>
-                            <Th w="1rem" color="palette.secondary">
-                              Pre-Requisite(s)
-                            </Th>
-                            <Th
-                              style={{ textAlign: "center" }}
-                              color="palette.secondary"
-                            >
-                              <div>Lecture</div>
-                              <div>Hours</div>
-                            </Th>
-                            <Th
-                              style={{ textAlign: "center" }}
-                              color="palette.secondary"
-                            >
-                              <div>Lab</div>
-                              <div>Hours</div>
-                            </Th>
-                            <Th
-                              style={{ textAlign: "center" }}
-                              color="palette.secondary"
-                            >
-                              <div>Course</div>
-                              <div>Credit</div>
-                            </Th>
-                            <Th
-                              style={{ textAlign: "center" }}
-                              color="palette.secondary"
-                            >
-                              Grades
-                            </Th>
+                            {showColumn && (
+                              <>
+                                <Th w="1rem" color="palette.secondary">
+                                  Pre-Requisite(s)
+                                </Th>
+                                <Th
+                                  style={{ textAlign: "center" }}
+                                  color="palette.secondary"
+                                >
+                                  <div>Lecture</div>
+                                  <div>Hours</div>
+                                </Th>
+                                <Th
+                                  style={{ textAlign: "center" }}
+                                  color="palette.secondary"
+                                >
+                                  <div>Lab</div>
+                                  <div>Hours</div>
+                                </Th>
+                                <Th
+                                  style={{ textAlign: "center" }}
+                                  color="palette.secondary"
+                                >
+                                  <div>Course</div>
+                                  <div>Credit</div>
+                                </Th>
+                                <Th
+                                  style={{ textAlign: "center" }}
+                                  color="palette.secondary"
+                                >
+                                  Grades
+                                </Th>
 
-                            <Th
-                              style={{ textAlign: "center" }}
-                              color="palette.secondary"
-                            >
-                              Remarks
-                            </Th>
-                            {(specialGradeSubmitted ||
-                              courses.some(
-                                (courseItem) =>
-                                  gradesSubmitted[courseItem.course_code] ||
-                                  (selectedGrades[courseItem.course_code] !==
-                                    undefined &&
-                                    (selectedGrades[courseItem.course_code] ===
-                                      5 ||
-                                      selectedGrades[courseItem.course_code] ===
-                                        -1 ||
-                                      selectedGrades[courseItem.course_code] ===
-                                        0 ||
-                                      selectedRemarks[
+                                <Th
+                                  style={{ textAlign: "center" }}
+                                  color="palette.secondary"
+                                >
+                                  Remarks
+                                </Th>
+                                {(specialGradeSubmitted ||
+                                  courses.some(
+                                    (courseItem) =>
+                                      gradesSubmitted[courseItem.course_code] ||
+                                      (selectedGrades[
                                         courseItem.course_code
-                                      ] === "Incomplete" ||
-                                      selectedRemarks[
-                                        courseItem.course_code
-                                      ] === "Withdraw"))
-                              )) && (
-                              <Th
-                                style={{ textAlign: "center" }}
-                                color="palette.secondary"
-                              >
-                                Action
-                              </Th>
+                                      ] !== undefined &&
+                                        (selectedGrades[
+                                          courseItem.course_code
+                                        ] === 5 ||
+                                          selectedGrades[
+                                            courseItem.course_code
+                                          ] === -1 ||
+                                          selectedGrades[
+                                            courseItem.course_code
+                                          ] === 0 ||
+                                          selectedRemarks[
+                                            courseItem.course_code
+                                          ] === "Incomplete" ||
+                                          selectedRemarks[
+                                            courseItem.course_code
+                                          ] === "Withdraw"))
+                                  )) && (
+                                  <Th
+                                    style={{ textAlign: "center" }}
+                                    color="palette.secondary"
+                                  >
+                                    Action
+                                  </Th>
+                                )}
+                              </>
                             )}
                           </Tr>
                         </Thead>
@@ -1493,58 +1571,38 @@ function Curriculum() {
                             </Tr>
                           ) : (
                             courses.map((courseItem) => (
-                              <Tr key={courseItem.course_code}>
-                                <Td fontSize="14px" fontStyle="bitter">
-                                  {courseItem.course_code}
-                                </Td>
-                                {console.log(
-                                  `Course Code: ${
-                                    courseItem.course_code
-                                  }, Selected Grade: ${
-                                    selectedGrades[courseItem.course_code]
-                                  }`
-                                )}
-                                <Td
-                                  className="course-title-cell"
-                                  fontSize="14px"
-                                  fontStyle="bitter"
-                                >
-                                  {courseItem.course_title}
-                                </Td>
-                                <Td
-                                  fontSize="14px"
-                                  fontStyle="bitter"
-                                  style={{
-                                    textAlign: "center",
-                                    lineHeight: "1.4",
-                                  }}
-                                >
-                                  {renderPrerequisites(
-                                    courseItem.pre_requisite
-                                  )}
-                                </Td>
-                                <Td
-                                  fontSize="14px"
-                                  fontStyle="bitter"
-                                  style={{ textAlign: "center" }}
-                                >
-                                  {courseItem.num_lecture}
-                                </Td>
-                                <Td
-                                  fontSize="14px"
-                                  fontStyle="bitter"
-                                  style={{ textAlign: "center" }}
-                                >
-                                  {courseItem.num_lab}
-                                </Td>
-                                <Td
-                                  fontSize="14px"
-                                  fontStyle="bitter"
-                                  style={{ textAlign: "center" }}
-                                >
-                                  {courseItem.credit_unit}
-                                </Td>
-                                <Td>
+                              <>
+                                <Tr key={courseItem.course_code}>
+                                  <Td fontSize="14px" fontStyle="bitter">
+                                    {window.innerWidth <= 600 && (
+                                      <IconButton
+                                        size="sm"
+                                        icon={
+                                          <Icon
+                                            as={FaPlus}
+                                            boxSize={4}
+                                            fontSize={14}
+                                          />
+                                        }
+                                        onClick={() =>
+                                          handleCheckboxChange(
+                                            courseItem.course_code
+                                          )
+                                        }
+                                        aria-label="Add"
+                                        colorScheme={
+                                          selectedItemIds.includes(
+                                            courseItem.course_code
+                                          )
+                                            ? "blue"
+                                            : "red"
+                                        }
+                                        borderRadius="full"
+                                        mr="1rem"
+                                      />
+                                    )}
+                                    {courseItem.course_code}
+                                  </Td>
                                   {console.log(
                                     `Course Code: ${
                                       courseItem.course_code
@@ -1552,236 +1610,635 @@ function Curriculum() {
                                       selectedGrades[courseItem.course_code]
                                     }`
                                   )}
-
-                                  <Select
-                                    //placeholder="Grades"
-                                    focusBorderColor="white"
-                                    opacity=".6"
-                                    w="6rem"
-                                    fontSize=".7rem"
-                                    fontWeight="semibold"
-                                    bgColor="#EEEEEE"
-                                    color="black"
-                                    textAlign="center"
-                                    justify="center"
-                                    // isDisabled={
-                                    //   editable[courseItem.course_code] === false
-                                    // }
-                                    isDisabled={isSelectDisabled(
-                                      courseItem.course_code,
-                                      courseItem.pre_requisite
-                                    )}
-                                    value={
-                                      selectedGrades[courseItem.course_code] !==
-                                      undefined
-                                        ? selectedGrades[
+                                  <Td
+                                    className="course-title-cell"
+                                    fontSize="14px"
+                                    fontStyle="bitter"
+                                  >
+                                    {courseItem.course_title}
+                                  </Td>
+                                  {showColumn && (
+                                    <>
+                                      <Td
+                                        fontSize="14px"
+                                        fontStyle="bitter"
+                                        style={{
+                                          textAlign: "center",
+                                          lineHeight: "1.4",
+                                        }}
+                                      >
+                                        {renderPrerequisites(
+                                          courseItem.pre_requisite
+                                        )}
+                                      </Td>
+                                      <Td
+                                        fontSize="14px"
+                                        fontStyle="bitter"
+                                        style={{ textAlign: "center" }}
+                                      >
+                                        {courseItem.num_lecture}
+                                      </Td>
+                                      <Td
+                                        fontSize="14px"
+                                        fontStyle="bitter"
+                                        style={{ textAlign: "center" }}
+                                      >
+                                        {courseItem.num_lab}
+                                      </Td>
+                                      <Td
+                                        fontSize="14px"
+                                        fontStyle="bitter"
+                                        style={{ textAlign: "center" }}
+                                      >
+                                        {courseItem.credit_unit}
+                                      </Td>
+                                      <Td>
+                                        {console.log(
+                                          `Course Code: ${
                                             courseItem.course_code
-                                          ] === 0
-                                          ? "0.00"
+                                          }, Selected Grade: ${
+                                            selectedGrades[
+                                              courseItem.course_code
+                                            ]
+                                          }`
+                                        )}
+
+                                        <Select
+                                          //placeholder="Grades"
+                                          focusBorderColor="white"
+                                          opacity=".6"
+                                          w="6rem"
+                                          fontSize=".7rem"
+                                          fontWeight="semibold"
+                                          bgColor="#EEEEEE"
+                                          color="black"
+                                          textAlign="center"
+                                          justify="center"
+                                          // isDisabled={
+                                          //   editable[courseItem.course_code] === false
+                                          // }
+                                          isDisabled={isSelectDisabled(
+                                            courseItem.course_code,
+                                            courseItem.pre_requisite
+                                          )}
+                                          value={
+                                            selectedGrades[
+                                              courseItem.course_code
+                                            ] !== undefined
+                                              ? selectedGrades[
+                                                  courseItem.course_code
+                                                ] === 0
+                                                ? "0.00"
+                                                : selectedGrades[
+                                                    courseItem.course_code
+                                                  ] === -1
+                                                ? "Incomplete"
+                                                : selectedGrades[
+                                                    courseItem.course_code
+                                                  ].toFixed(2)
+                                              : gradesForZeroOrMinusOne(
+                                                  courseItem.course_code
+                                                )
+                                          }
+                                          onChange={(e) => {
+                                            const courseCode =
+                                              courseItem.course_code;
+                                            const value = e.target.value;
+                                            let remarks;
+
+                                            if (value === "Withdraw") {
+                                              // Set both grade and remarks to "Withdraw"
+                                              setSelectedGrades({
+                                                ...selectedGrades,
+                                                [courseCode]: 0,
+                                              });
+                                              remarks = "Withdraw";
+                                            } else if (value === "Incomplete") {
+                                              setSelectedGrades({
+                                                ...selectedGrades,
+                                                [courseCode]: -1,
+                                              });
+                                              remarks = "Incomplete";
+                                            } else if (value === "Grades") {
+                                              // Clear the selection
+                                              setSelectedGrades({
+                                                ...selectedGrades,
+                                                [courseCode]: undefined,
+                                              });
+                                            } else if (value) {
+                                              setSelectedGrades({
+                                                ...selectedGrades,
+                                                [courseCode]: parseFloat(value),
+                                              });
+                                            }
+
+                                            // Set remarks if available
+                                            setSelectedRemarks({
+                                              ...selectedRemarks,
+                                              [courseCode]: remarks,
+                                            });
+                                            console.log(
+                                              "New selectedGrades:",
+                                              selectedGrades
+                                            );
+                                            console.log(
+                                              "New selectedRemarks:",
+                                              selectedRemarks
+                                            );
+                                          }}
+                                        >
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="Grades"
+                                          >
+                                            Grades
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="1.00"
+                                          >
+                                            1.00
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="1.25"
+                                          >
+                                            1.25
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="1.50"
+                                          >
+                                            1.50
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="1.75"
+                                          >
+                                            1.75
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="2.00"
+                                          >
+                                            2.00
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="2.25"
+                                          >
+                                            2.25
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="2.50"
+                                          >
+                                            2.50
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="2.75"
+                                          >
+                                            2.75
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="3.00"
+                                          >
+                                            3.00
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="5.00"
+                                          >
+                                            5.00
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="Incomplete"
+                                          >
+                                            Incomplete
+                                          </option>
+                                          <option
+                                            style={{ color: "black" }}
+                                            value="0.00"
+                                          >
+                                            Withdraw
+                                          </option>
+                                        </Select>
+                                      </Td>
+                                      <Td
+                                        style={{ textAlign: "center" }}
+                                        fontSize="13px"
+                                        fontStyle="bitter"
+                                      >
+                                        {selectedRemarks[
+                                          courseItem.course_code
+                                        ] === "Incomplete"
+                                          ? "Incomplete"
+                                          : selectedRemarks[
+                                              courseItem.course_code
+                                            ] === "Withdraw"
+                                          ? "Withdraw"
+                                          : selectedGrades[
+                                              courseItem.course_code
+                                            ] === 0
+                                          ? "Withdraw"
                                           : selectedGrades[
                                               courseItem.course_code
                                             ] === -1
                                           ? "Incomplete"
                                           : selectedGrades[
                                               courseItem.course_code
-                                            ].toFixed(2)
-                                        : gradesForZeroOrMinusOne(
+                                            ] !== undefined &&
+                                            parseFloat(
+                                              selectedGrades[
+                                                courseItem.course_code
+                                              ]
+                                            ) >= 1.0 &&
+                                            parseFloat(
+                                              selectedGrades[
+                                                courseItem.course_code
+                                              ]
+                                            ) <= 3.0
+                                          ? "P"
+                                          : selectedGrades[
+                                              courseItem.course_code
+                                            ] === 5.0
+                                          ? "F"
+                                          : null}
+                                      </Td>
+                                      <Td
+                                        style={{ textAlign: "center" }}
+                                        fontSize="13px"
+                                        fontStyle="bitter"
+                                      >
+                                        {(gradesSubmitted[
+                                          courseItem.course_code
+                                        ] ||
+                                          (selectedGrades[
                                             courseItem.course_code
-                                          )
-                                    }
-                                    onChange={(e) => {
-                                      const courseCode = courseItem.course_code;
-                                      const value = e.target.value;
-                                      let remarks;
-
-                                      if (value === "Withdraw") {
-                                        // Set both grade and remarks to "Withdraw"
-                                        setSelectedGrades({
-                                          ...selectedGrades,
-                                          [courseCode]: 0,
-                                        });
-                                        remarks = "Withdraw";
-                                      } else if (value === "Incomplete") {
-                                        setSelectedGrades({
-                                          ...selectedGrades,
-                                          [courseCode]: -1,
-                                        });
-                                        remarks = "Incomplete";
-                                      } else if (value === "Grades") {
-                                        // Clear the selection
-                                        setSelectedGrades({
-                                          ...selectedGrades,
-                                          [courseCode]: undefined,
-                                        });
-                                      } else if (value) {
-                                        setSelectedGrades({
-                                          ...selectedGrades,
-                                          [courseCode]: parseFloat(value),
-                                        });
-                                      }
-
-                                      // Set remarks if available
-                                      setSelectedRemarks({
-                                        ...selectedRemarks,
-                                        [courseCode]: remarks,
-                                      });
-                                      console.log(
-                                        "New selectedGrades:",
-                                        selectedGrades
-                                      );
-                                      console.log(
-                                        "New selectedRemarks:",
-                                        selectedRemarks
-                                      );
-                                    }}
-                                  >
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="Grades"
-                                    >
-                                      Grades
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="1.00"
-                                    >
-                                      1.00
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="1.25"
-                                    >
-                                      1.25
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="1.50"
-                                    >
-                                      1.50
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="1.75"
-                                    >
-                                      1.75
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="2.00"
-                                    >
-                                      2.00
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="2.25"
-                                    >
-                                      2.25
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="2.50"
-                                    >
-                                      2.50
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="2.75"
-                                    >
-                                      2.75
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="3.00"
-                                    >
-                                      3.00
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="5.00"
-                                    >
-                                      5.00
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="Incomplete"
-                                    >
-                                      Incomplete
-                                    </option>
-                                    <option
-                                      style={{ color: "black" }}
-                                      value="0.00"
-                                    >
-                                      Withdraw
-                                    </option>
-                                  </Select>
-                                </Td>
-                                <Td
-                                  style={{ textAlign: "center" }}
-                                  fontSize="13px"
-                                  fontStyle="bitter"
-                                >
-                                  {selectedRemarks[courseItem.course_code] ===
-                                  "Incomplete"
-                                    ? "Incomplete"
-                                    : selectedRemarks[
-                                        courseItem.course_code
-                                      ] === "Withdraw"
-                                    ? "Withdraw"
-                                    : selectedGrades[courseItem.course_code] ===
-                                      0
-                                    ? "Withdraw"
-                                    : selectedGrades[courseItem.course_code] ===
-                                      -1
-                                    ? "Incomplete"
-                                    : selectedGrades[courseItem.course_code] !==
-                                        undefined &&
-                                      parseFloat(
-                                        selectedGrades[courseItem.course_code]
-                                      ) >= 1.0 &&
-                                      parseFloat(
-                                        selectedGrades[courseItem.course_code]
-                                      ) <= 3.0
-                                    ? "P"
-                                    : selectedGrades[courseItem.course_code] ===
-                                      5.0
-                                    ? "F"
-                                    : null}
-                                </Td>
-                                <Td
-                                  style={{ textAlign: "center" }}
-                                  fontSize="13px"
-                                  fontStyle="bitter"
-                                >
-                                  {(gradesSubmitted[courseItem.course_code] ||
-                                    (selectedGrades[courseItem.course_code] !==
-                                      undefined &&
-                                      (selectedGrades[
-                                        courseItem.course_code
-                                      ] === 5 ||
-                                        selectedGrades[
-                                          courseItem.course_code
-                                        ] === -1 ||
-                                        selectedGrades[
-                                          courseItem.course_code
-                                        ] === 0 ||
-                                        selectedRemarks[
-                                          courseItem.course_code
-                                        ] === "Incomplete" ||
-                                        selectedRemarks[
-                                          courseItem.course_code
-                                        ] === "Withdraw"))) && (
-                                    <Button
-                                      onClick={() =>
-                                        handleSpecialGradeButtonClick(
-                                          courseItem
-                                        )
-                                      }
-                                    >
-                                      Edit
-                                    </Button>
+                                          ] !== undefined &&
+                                            (selectedGrades[
+                                              courseItem.course_code
+                                            ] === 5 ||
+                                              selectedGrades[
+                                                courseItem.course_code
+                                              ] === -1 ||
+                                              selectedGrades[
+                                                courseItem.course_code
+                                              ] === 0 ||
+                                              selectedRemarks[
+                                                courseItem.course_code
+                                              ] === "Incomplete" ||
+                                              selectedRemarks[
+                                                courseItem.course_code
+                                              ] === "Withdraw"))) && (
+                                          <Button
+                                            onClick={() =>
+                                              handleSpecialGradeButtonClick(
+                                                courseItem
+                                              )
+                                            }
+                                          >
+                                            Edit
+                                          </Button>
+                                        )}
+                                      </Td>
+                                    </>
                                   )}
-                                </Td>
-                              </Tr>
+                                </Tr>
+                                {window.innerWidth <= 600 && (
+                                  <Td
+                                    display={
+                                      selectedItemIds.includes(
+                                        courseItem.course_code
+                                      )
+                                        ? "table-row"
+                                        : "none"
+                                    }
+                                    w="80%"
+                                  >
+                                    {" "}
+                                    <Flex justify="flex-end" ml="1rem">
+                                      <VStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="6rem"
+                                            fontWeight="bold"
+                                          >
+                                            Pre-Requisite(s):
+                                          </Text>{" "}
+                                          <Text>
+                                            {" "}
+                                            {renderPrerequisites(
+                                              courseItem.pre_requisite
+                                            )}
+                                          </Text>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            <div>Lecture</div>
+                                            <div>Hours</div>
+                                          </Text>{" "}
+                                          <Text> {courseItem.num_lecture}</Text>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            <div>Lab</div>
+                                            <div>Hours</div>
+                                          </Text>{" "}
+                                          <Text> {courseItem.num_lab}</Text>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            <div>Course</div>
+                                            <div>Credit</div>
+                                          </Text>{" "}
+                                          <Text>{courseItem.credit_unit}</Text>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            Grades
+                                          </Text>{" "}
+                                          <Select
+                                            //placeholder="Grades"
+                                            focusBorderColor="white"
+                                            opacity=".6"
+                                            w="6rem"
+                                            fontSize=".7rem"
+                                            fontWeight="semibold"
+                                            bgColor="#EEEEEE"
+                                            color="black"
+                                            textAlign="center"
+                                            justify="center"
+                                            // isDisabled={
+                                            //   editable[courseItem.course_code] === false
+                                            // }
+                                            isDisabled={isSelectDisabled(
+                                              courseItem.course_code,
+                                              courseItem.pre_requisite
+                                            )}
+                                            value={
+                                              selectedGrades[
+                                                courseItem.course_code
+                                              ] !== undefined
+                                                ? selectedGrades[
+                                                    courseItem.course_code
+                                                  ] === 0
+                                                  ? "0.00"
+                                                  : selectedGrades[
+                                                      courseItem.course_code
+                                                    ] === -1
+                                                  ? "Incomplete"
+                                                  : selectedGrades[
+                                                      courseItem.course_code
+                                                    ].toFixed(2)
+                                                : gradesForZeroOrMinusOne(
+                                                    courseItem.course_code
+                                                  )
+                                            }
+                                            onChange={(e) => {
+                                              const courseCode =
+                                                courseItem.course_code;
+                                              const value = e.target.value;
+                                              let remarks;
+
+                                              if (value === "Withdraw") {
+                                                // Set both grade and remarks to "Withdraw"
+                                                setSelectedGrades({
+                                                  ...selectedGrades,
+                                                  [courseCode]: 0,
+                                                });
+                                                remarks = "Withdraw";
+                                              } else if (
+                                                value === "Incomplete"
+                                              ) {
+                                                setSelectedGrades({
+                                                  ...selectedGrades,
+                                                  [courseCode]: -1,
+                                                });
+                                                remarks = "Incomplete";
+                                              } else if (value === "Grades") {
+                                                // Clear the selection
+                                                setSelectedGrades({
+                                                  ...selectedGrades,
+                                                  [courseCode]: undefined,
+                                                });
+                                              } else if (value) {
+                                                setSelectedGrades({
+                                                  ...selectedGrades,
+                                                  [courseCode]:
+                                                    parseFloat(value),
+                                                });
+                                              }
+
+                                              // Set remarks if available
+                                              setSelectedRemarks({
+                                                ...selectedRemarks,
+                                                [courseCode]: remarks,
+                                              });
+                                              console.log(
+                                                "New selectedGrades:",
+                                                selectedGrades
+                                              );
+                                              console.log(
+                                                "New selectedRemarks:",
+                                                selectedRemarks
+                                              );
+                                            }}
+                                          >
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="Grades"
+                                            >
+                                              Grades
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="1.00"
+                                            >
+                                              1.00
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="1.25"
+                                            >
+                                              1.25
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="1.50"
+                                            >
+                                              1.50
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="1.75"
+                                            >
+                                              1.75
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="2.00"
+                                            >
+                                              2.00
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="2.25"
+                                            >
+                                              2.25
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="2.50"
+                                            >
+                                              2.50
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="2.75"
+                                            >
+                                              2.75
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="3.00"
+                                            >
+                                              3.00
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="5.00"
+                                            >
+                                              5.00
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="Incomplete"
+                                            >
+                                              Incomplete
+                                            </option>
+                                            <option
+                                              style={{ color: "black" }}
+                                              value="0.00"
+                                            >
+                                              Withdraw
+                                            </option>
+                                          </Select>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            Remarks
+                                          </Text>{" "}
+                                          <>
+                                            {selectedRemarks[
+                                              courseItem.course_code
+                                            ] === "Incomplete"
+                                              ? "Incomplete"
+                                              : selectedRemarks[
+                                                  courseItem.course_code
+                                                ] === "Withdraw"
+                                              ? "Withdraw"
+                                              : selectedGrades[
+                                                  courseItem.course_code
+                                                ] === 0
+                                              ? "Withdraw"
+                                              : selectedGrades[
+                                                  courseItem.course_code
+                                                ] === -1
+                                              ? "Incomplete"
+                                              : selectedGrades[
+                                                  courseItem.course_code
+                                                ] !== undefined &&
+                                                parseFloat(
+                                                  selectedGrades[
+                                                    courseItem.course_code
+                                                  ]
+                                                ) >= 1.0 &&
+                                                parseFloat(
+                                                  selectedGrades[
+                                                    courseItem.course_code
+                                                  ]
+                                                ) <= 3.0
+                                              ? "P"
+                                              : selectedGrades[
+                                                  courseItem.course_code
+                                                ] === 5.0
+                                              ? "F"
+                                              : null}
+                                          </>
+                                        </HStack>
+                                        <HStack w="10rem">
+                                          <Text
+                                            textAlign="left"
+                                            w="8rem"
+                                            fontWeight="bold"
+                                          >
+                                            Actions
+                                          </Text>{" "}
+                                          <>
+                                            {" "}
+                                            {(gradesSubmitted[
+                                              courseItem.course_code
+                                            ] ||
+                                              (selectedGrades[
+                                                courseItem.course_code
+                                              ] !== undefined &&
+                                                (selectedGrades[
+                                                  courseItem.course_code
+                                                ] === 5 ||
+                                                  selectedGrades[
+                                                    courseItem.course_code
+                                                  ] === -1 ||
+                                                  selectedGrades[
+                                                    courseItem.course_code
+                                                  ] === 0 ||
+                                                  selectedRemarks[
+                                                    courseItem.course_code
+                                                  ] === "Incomplete" ||
+                                                  selectedRemarks[
+                                                    courseItem.course_code
+                                                  ] === "Withdraw"))) && (
+                                              <Button
+                                                onClick={() =>
+                                                  handleSpecialGradeButtonClick(
+                                                    courseItem
+                                                  )
+                                                }
+                                              >
+                                                Edit
+                                              </Button>
+                                            )}
+                                          </>
+                                        </HStack>
+                                      </VStack>
+                                    </Flex>
+                                  </Td>
+                                )}
+                              </>
                             ))
                           )}
                         </Tbody>
@@ -1791,77 +2248,160 @@ function Curriculum() {
                           colSpan="5"
                           textAlign="center"
                         >
-                          <Tr>
-                            <Th></Th>
-                            <Th
-                              fontSize="13px"
-                              fontStyle="bitter"
-                              style={{ textAlign: "center" }}
-                            >
-                              Total
-                            </Th>
-                            <Th></Th>
-                            <Th
-                              fontSize="13px"
-                              fontStyle="bitter"
-                              style={{ textAlign: "center" }}
-                            >
-                              {totalLectureHours}
-                            </Th>
-                            <Th
-                              fontSize="13px"
-                              fontStyle="bitter"
-                              style={{ textAlign: "center" }}
-                            >
-                              {totalLabHours}
-                            </Th>
-                            <Th
-                              fontSize="13px"
-                              fontStyle="bitter"
-                              style={{ textAlign: "center" }}
-                            >
-                              {totalCourseCredits}
-                            </Th>
-                            <Th
-                              fontSize="13px"
-                              fontStyle="bitter"
-                              style={{ textAlign: "center" }}
-                            >
-                              {gwa}
-                            </Th>
-                            <Th style={{ textAlign: "center" }}>
-                              {" "}
-                              {gwa >= 1.0 && gwa <= 3.0
-                                ? "P"
-                                : gwa == 5.0
-                                ? "F"
-                                : null}
-                            </Th>
-                            {(specialGradeSubmitted ||
-                              courses.some(
-                                (courseItem) =>
-                                  gradesSubmitted[courseItem.course_code] ||
-                                  (selectedGrades[courseItem.course_code] !==
-                                    undefined &&
-                                    (selectedGrades[courseItem.course_code] ===
-                                      5 ||
-                                      selectedGrades[courseItem.course_code] ===
-                                        -1 ||
-                                      selectedGrades[courseItem.course_code] ===
-                                        0 ||
-                                      selectedRemarks[
-                                        courseItem.course_code
-                                      ] === "Incomplete" ||
-                                      selectedRemarks[
-                                        courseItem.course_code
-                                      ] === "Withdraw"))
-                              )) && (
-                              <Th
-                                style={{ textAlign: "center" }}
-                                color="palette.secondary"
-                              ></Th>
+                          <>
+                            {window.innerWidth <= 600 && (
+                              <Flex justify="flex-end" ml="1rem" w="100%">
+                                <VStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="6rem"
+                                      fontWeight="bold"
+                                    >
+                                      Total:
+                                    </Text>{" "}
+                                    <Text></Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Lecture hours:
+                                    </Text>{" "}
+                                    <Text>{totalLectureHours}</Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Lab hours:
+                                    </Text>{" "}
+                                    <Text>{totalLabHours} </Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Course credit:
+                                    </Text>{" "}
+                                    <Text>{totalCourseCredits} </Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Grades:
+                                    </Text>{" "}
+                                    <Text>{gwa} </Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Remarks:
+                                    </Text>{" "}
+                                    <Text>
+                                      {" "}
+                                      {gwa >= 1.0 && gwa <= 3.0
+                                        ? "P"
+                                        : gwa == 5.0
+                                        ? "F"
+                                        : null}{" "}
+                                    </Text>
+                                  </HStack>
+                                </VStack>
+                              </Flex>
                             )}
-                          </Tr>
+                          </>
+                          <>
+                            {window.innerWidth >= 600 && (
+                              <Tr>
+                                <Th></Th>
+                                <Th
+                                  fontSize="13px"
+                                  fontStyle="bitter"
+                                  style={{ textAlign: "center" }}
+                                >
+                                  Total
+                                </Th>
+                                <Th></Th>
+                                <Th
+                                  fontSize="13px"
+                                  fontStyle="bitter"
+                                  style={{ textAlign: "center" }}
+                                >
+                                  {totalLectureHours}
+                                </Th>
+                                <Th
+                                  fontSize="13px"
+                                  fontStyle="bitter"
+                                  style={{ textAlign: "center" }}
+                                >
+                                  {totalLabHours}
+                                </Th>
+                                <Th
+                                  fontSize="13px"
+                                  fontStyle="bitter"
+                                  style={{ textAlign: "center" }}
+                                >
+                                  {totalCourseCredits}
+                                </Th>
+                                <Th
+                                  fontSize="13px"
+                                  fontStyle="bitter"
+                                  style={{ textAlign: "center" }}
+                                >
+                                  {gwa}
+                                </Th>
+                                <Th style={{ textAlign: "center" }}>
+                                  {" "}
+                                  {gwa >= 1.0 && gwa <= 3.0
+                                    ? "P"
+                                    : gwa == 5.0
+                                    ? "F"
+                                    : null}
+                                </Th>
+                                {(specialGradeSubmitted ||
+                                  courses.some(
+                                    (courseItem) =>
+                                      gradesSubmitted[courseItem.course_code] ||
+                                      (selectedGrades[
+                                        courseItem.course_code
+                                      ] !== undefined &&
+                                        (selectedGrades[
+                                          courseItem.course_code
+                                        ] === 5 ||
+                                          selectedGrades[
+                                            courseItem.course_code
+                                          ] === -1 ||
+                                          selectedGrades[
+                                            courseItem.course_code
+                                          ] === 0 ||
+                                          selectedRemarks[
+                                            courseItem.course_code
+                                          ] === "Incomplete" ||
+                                          selectedRemarks[
+                                            courseItem.course_code
+                                          ] === "Withdraw"))
+                                  )) && (
+                                  <Th
+                                    style={{ textAlign: "center" }}
+                                    color="palette.secondary"
+                                  ></Th>
+                                )}
+                              </Tr>
+                            )}
+                          </>
                         </Tfoot>
                       </Table>
                     </TableContainer>
@@ -1869,7 +2409,7 @@ function Curriculum() {
                       color="white"
                       bg="palette.primary"
                       w="7rem"
-                      ml="59rem"
+                      ml="0"
                       _hover={{
                         transition: "opacity 0.1s ease-in-out",
                       }}
@@ -1903,13 +2443,10 @@ function Curriculum() {
               onSaveSuccess={handleGradesSaved}
             />
           )}
-
-          <Spacer mt="10rem" />
-          <Footer mt="auto" />
-          <Footer />
         </div>
       </VStack>
-      {/* {studentDataNew?.email && <Conversation />} */}
+      <Spacer mt="10rem" />
+      <Footer mt="auto" />
     </Flex>
   );
 }
