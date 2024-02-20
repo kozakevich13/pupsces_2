@@ -14,12 +14,17 @@ import {
   Th,
   Thead,
   Tr,
+  VStack,
+  Text,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
 import axios from "axios";
 import html2pdf from "html2pdf.js";
 import Cookies from "js-cookie";
 import { useEffect, useRef, useState } from "react";
 import { endPoint } from "../../../config";
+import { FaPlus } from "react-icons/fa";
 
 function Achiever() {
   const facultyEmail = Cookies.get("facultyEmail");
@@ -33,6 +38,8 @@ function Achiever() {
   const [selectedYearLevel, setSelectedYearLevel] = useState("");
   const [studentNumberWithGrades, setStudentNumberWithGrades] = useState([]);
   const [startYear, setStartYear] = useState("");
+  const [showColumn, setShowColumn] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
 
   const containerRef = useRef(null);
 
@@ -299,17 +306,31 @@ function Achiever() {
 
   const isDataAvailable = selectedYearLevel && selectedAcademicYear;
 
+  const handleCheckboxChange = (id) => {
+    setSelectedItemIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        return prevSelectedIds.filter((itemId) => itemId !== id);
+      } else {
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowColumn(window.innerWidth > 600);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <Card
-   
-      mt="2rem"
-      w="100%"
-      h="auto"
-      boxShadow="2xl"
-      borderRadius="30px"
-    >
+    <Card mt="2rem" w="100%" h="auto" boxShadow="2xl" borderRadius="30px">
       <div ref={containerRef}>
-        <Flex justify="space-between" align="center" >
+        <Flex justify="space-between" align="center">
           <CardHeader>Student(s) that are Listers</CardHeader>
           <HStack>
             <Select
@@ -387,21 +408,25 @@ function Achiever() {
                   >
                     Name
                   </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    fontSize="10px"
-                    color="palette.secondary"
-                  >
-                    Average
-                  </Th>
+                  {showColumn && (
+                    <>
+                      <Th
+                        style={{ textAlign: "center" }}
+                        fontSize="10px"
+                        color="palette.secondary"
+                      >
+                        Average
+                      </Th>
 
-                  <Th
-                    style={{ textAlign: "center" }}
-                    fontSize="10px"
-                    color="palette.secondary"
-                  >
-                    Placement
-                  </Th>
+                      <Th
+                        style={{ textAlign: "center" }}
+                        fontSize="10px"
+                        color="palette.secondary"
+                      >
+                        Placement
+                      </Th>
+                    </>
+                  )}
                 </Tr>
               </Thead>
 
@@ -422,19 +447,84 @@ function Achiever() {
                       );
 
                       return (
-                        <Tr key={student.student_number}>
-                          <Td style={{ textAlign: "center" }}>
-                            {student.student_number}
-                          </Td>
-                          <Td style={{ textAlign: "center" }}>{`${
-                            studentData.first_name || ""
-                          } ${studentData.middle_name || ""} ${
-                            studentData.last_name || ""
-                          }`}</Td>
-                          <Td style={{ textAlign: "center" }}>
-                            {averageForSelectedYear}
-                          </Td>
-                        </Tr>
+                        <>
+                          <Tr key={student.student_number}>
+                            <Td style={{ textAlign: "center" }}>
+                              {window.innerWidth <= 600 && (
+                                <IconButton
+                                  size="sm"
+                                  icon={
+                                    <Icon
+                                      as={FaPlus}
+                                      boxSize={4}
+                                      fontSize={14}
+                                    />
+                                  }
+                                  onClick={() =>
+                                    handleCheckboxChange(student.student_number)
+                                  }
+                                  aria-label="Add"
+                                  colorScheme={
+                                    selectedItemIds.includes(
+                                      student.student_number
+                                    )
+                                      ? "blue"
+                                      : "red"
+                                  }
+                                  borderRadius="full"
+                                  mr="1rem"
+                                />
+                              )}
+                              {student.student_number}
+                            </Td>
+                            <Td style={{ textAlign: "center" }}>{`${
+                              studentData.first_name || ""
+                            } ${studentData.middle_name || ""} ${
+                              studentData.last_name || ""
+                            }`}</Td>
+                            {showColumn && (
+                              <Td style={{ textAlign: "center" }}>
+                                {averageForSelectedYear}
+                              </Td>
+                            )}
+                          </Tr>
+                          {window.innerWidth <= 600 && (
+                            <Td
+                              display={
+                                selectedItemIds.includes(student.student_number)
+                                  ? "table-row"
+                                  : "none"
+                              }
+                              w="80%"
+                            >
+                              {" "}
+                              <Flex justify="flex-end" ml="1rem">
+                                <VStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="6rem"
+                                      fontWeight="bold"
+                                    >
+                                      Average:
+                                    </Text>{" "}
+                                    <Text> {averageForSelectedYear}</Text>
+                                  </HStack>
+                                  <HStack w="10rem">
+                                    <Text
+                                      textAlign="left"
+                                      w="8rem"
+                                      fontWeight="bold"
+                                    >
+                                      Placement:
+                                    </Text>{" "}
+                                    <Text></Text>
+                                  </HStack>
+                                </VStack>
+                              </Flex>
+                            </Td>
+                          )}
+                        </>
                       );
                     }
 
