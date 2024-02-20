@@ -14,11 +14,16 @@ import {
   Th,
   Thead,
   Tr,
+  VStack,
+  Text,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { endPoint } from "../../../config";
+import { FaPlus } from "react-icons/fa";
 
 function Major() {
   const [inteCourses, setInteCourses] = useState([]);
@@ -33,6 +38,8 @@ function Major() {
     useState([]);
 
   const [selectedSemester, setSelectedSemester] = useState();
+  const [showColumn, setShowColumn] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
 
   useEffect(() => {
     setStartYear(studentNumber.substring(0, 4));
@@ -245,6 +252,27 @@ function Major() {
     }
   };
 
+  const handleCheckboxChange = (id) => {
+    setSelectedItemIds((prevSelectedIds) => {
+      if (prevSelectedIds.includes(id)) {
+        return prevSelectedIds.filter((itemId) => itemId !== id);
+      } else {
+        return [...prevSelectedIds, id];
+      }
+    });
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowColumn(window.innerWidth > 600);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <Card
       display="flex"
@@ -354,45 +382,126 @@ function Major() {
                   <div>Course</div>
                   <div>Title</div>
                 </Th>
-                <Th
-                  style={{ textAlign: "center" }}
-                  fontSize="10px"
-                  color="palette.secondary"
-                >
-                  Grades
-                </Th>
-                <Th
-                  style={{ textAlign: "center" }}
-                  fontSize="10px"
-                  color="palette.secondary"
-                >
-                  Remarks
-                </Th>
-                <Th
-                  style={{ textAlign: "center" }}
-                  fontSize="10px"
-                  color="palette.secondary"
-                >
-                  Academic Year
-                </Th>
+                {showColumn && (
+                  <>
+                    <Th
+                      style={{ textAlign: "center" }}
+                      fontSize="10px"
+                      color="palette.secondary"
+                    >
+                      Grades
+                    </Th>
+                    <Th
+                      style={{ textAlign: "center" }}
+                      fontSize="10px"
+                      color="palette.secondary"
+                    >
+                      Remarks
+                    </Th>
+                    <Th
+                      style={{ textAlign: "center" }}
+                      fontSize="10px"
+                      color="palette.secondary"
+                    >
+                      Academic Year
+                    </Th>
+                  </>
+                )}
               </Tr>
             </Thead>
             <Tbody>
               {selectedSemester === "First Semester"
                 ? top3LowestGradesFirstSemester.map((course, index) => (
-                    <Tr key={index}>
-                      <Td style={{ textAlign: "center" }}>
-                        {course.course_code}
-                      </Td>
-                      <Td style={{ textAlign: "center" }}>
-                        {course.course_title}
-                      </Td>
-                      <Td style={{ textAlign: "center" }}>{course.grades}</Td>
-                      <Td style={{ textAlign: "center" }}>{course.remarks}</Td>
-                      <Td style={{ textAlign: "center" }}>
-                        {getAcademicYear(startYear, course.course_year)}
-                      </Td>
-                    </Tr>
+                    <>
+                      <Tr key={index}>
+                        <Td style={{ textAlign: "center" }}>
+                          {window.innerWidth <= 600 && (
+                            <IconButton
+                              size="sm"
+                              icon={
+                                <Icon as={FaPlus} boxSize={4} fontSize={14} />
+                              }
+                              onClick={() => handleCheckboxChange(index)}
+                              aria-label="Add"
+                              colorScheme={
+                                selectedItemIds.includes(index) ? "blue" : "red"
+                              }
+                              borderRadius="full"
+                              mr="1rem"
+                            />
+                          )}
+                          {course.course_code}
+                        </Td>
+                        <Td style={{ textAlign: "center" }}>
+                          {course.course_title}
+                        </Td>
+                        {showColumn && (
+                          <>
+                            <Td style={{ textAlign: "center" }}>
+                              {course.grades}
+                            </Td>
+                            <Td style={{ textAlign: "center" }}>
+                              {course.remarks}
+                            </Td>
+                            <Td style={{ textAlign: "center" }}>
+                              {getAcademicYear(startYear, course.course_year)}
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                      {window.innerWidth <= 600 && (
+                        <Td
+                          display={
+                            selectedItemIds.includes(index)
+                              ? "table-row"
+                              : "none"
+                          }
+                          w="80%"
+                        >
+                          {" "}
+                          <Flex justify="flex-end" ml="1rem">
+                            <VStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="6rem"
+                                  fontWeight="bold"
+                                >
+                                  Grades:
+                                </Text>{" "}
+                                <Text> {course.grades}</Text>
+                              </HStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="8rem"
+                                  fontWeight="bold"
+                                >
+                                  Remarks:
+                                </Text>{" "}
+                                <Text>{course.remarks}</Text>
+                              </HStack>
+                              <HStack w="10rem">
+                                <Text
+                                  textAlign="left"
+                                  w="8rem"
+                                  fontWeight="bold"
+                                >
+                                  Academic Year:
+                                </Text>{" "}
+                                <Text>
+                                  {" "}
+                                  {getAcademicYear(
+                                    startYear,
+                                    course.course_year
+                                  )}
+                                </Text>
+                              </HStack>
+                            </VStack>
+                          </Flex>
+                        </Td>
+                      )}
+                    </>
                   ))
                 : selectedSemester === "Second Semester"
                 ? top3LowestGradesSecondSemester.map((course, index) => (
